@@ -1,5 +1,6 @@
 package com.lincor.javatest.domain;
 import lombok.*;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -7,13 +8,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
-@NamedQueries({
-        @NamedQuery(
-        name = "Expense.twodates",
-        query = "SELECT * FROM expense"
-        )
-})
 
+@EnableJpaRepositories
 @Getter
 @Setter
 @Entity

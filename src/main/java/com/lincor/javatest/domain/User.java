@@ -8,12 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@NamedQueries({
-        @NamedQuery(
-                name = "User.all",
-                query = "SELECT * FROM USERS"
-        )
-})
 
 
 @Getter
