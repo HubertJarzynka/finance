@@ -1,5 +1,6 @@
 package com.lincor.javatest.service;
 
+import com.lincor.excercise.DbManager;
 import com.lincor.javatest.domain.Expense;
 import com.lincor.javatest.domain.User;
 import com.lincor.javatest.dto.ExpenseDto;
@@ -13,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Service
@@ -25,7 +29,7 @@ public class ExpenseService {
     private final UserRepository userRepository;
 
 
-    public Expense createExpense (final ExpenseDto expenseDto) throws UserNotFoundException {
+    public Expense createExpense(final ExpenseDto expenseDto) throws UserNotFoundException {
         User user = userRepository.findById(expenseDto.getUserId()).orElseThrow(UserNotFoundException::new);
 
 
@@ -39,47 +43,67 @@ public class ExpenseService {
                 .build();
 
         return expense;
-        }
+    }
 
-        public Expense updateExpense(ExpenseDto expenseDto) throws UserNotFoundException, ExpenseNotFoundException {
-            User user = userRepository.findById(expenseDto.getUserId()).orElseThrow(UserNotFoundException::new);
-            Expense expense = expenseRepository.findById(expenseDto.getId()).orElseThrow(ExpenseNotFoundException::new);
+    public Expense updateExpense(ExpenseDto expenseDto) throws UserNotFoundException, ExpenseNotFoundException {
+        User user = userRepository.findById(expenseDto.getUserId()).orElseThrow(UserNotFoundException::new);
+        Expense expense = expenseRepository.findById(expenseDto.getId()).orElseThrow(ExpenseNotFoundException::new);
 
-            expense.setUser(user);
-            expense.setCategory(expenseDto.getCategory());
-            expense.setCost(expenseDto.getCost());
-            expense.setValue(expenseDto.getValue());
-            expense.setPayment(expenseDto.getPayment());
-            expense.setDate(expenseDto.getDate());
+        expense.setUser(user);
+        expense.setCategory(expenseDto.getCategory());
+        expense.setCost(expenseDto.getCost());
+        expense.setValue(expenseDto.getValue());
+        expense.setPayment(expenseDto.getPayment());
+        expense.setDate(expenseDto.getDate());
 
-            return expense;
+        return expense;
 
-        }
+    }
 
-        public void deleteExpense(Long id) throws ExpenseNotFoundException {
+    public void deleteExpense(Long id) throws ExpenseNotFoundException {
         Expense expense = expenseRepository.findById(id).orElseThrow(ExpenseNotFoundException::new);
 
         expense.getUser().getExpenseList().remove(expense);
 
         expenseRepository.deleteById(id);
 
+    }
+
+    public Expense updateExpense(final Expense expense) throws ExpenseNotFoundException {
+        if (expenseRepository.existsById(expense.getId())) {
+            expenseRepository.save(expense);
+            return expense;
+        } else {
+            throw new ExpenseNotFoundException();
         }
+    }
 
-        public Expense updateExpense(final Expense expense) throws ExpenseNotFoundException {
-            if (expenseRepository.existsById(expense.getId())) {
-                expenseRepository.save(expense);
-                return expense;
-            } else {
-                throw new ExpenseNotFoundException();
-            }
+
+    public List<Expense> getAllExpenses() {
+        return expenseRepository.findAll();
+    }
+
+    DbManager dbManager;
+
+    public void testAllExpenseUserByCategory() throws SQLException {
+        //Given
+        DbManager dbManager = DbManager.getInstance();
+
+        String sqlQuery = "SELECT cost, value FROM expense  WHERE category = 'general' and user_id = 1;";
+        Statement statement = dbManager.getConnection().createStatement();
+        ResultSet rs = statement.executeQuery(sqlQuery);
+
+        //Then
+        int counter = 0;
+        while (rs.next()) {
+            System.out.println(rs.getString("COST") + ", " +
+                    rs.getInt("VALUE"));
+
         }
+        rs.close();
+        statement.close();
 
 
-        public List<Expense> getAllExpenses(){
-            return expenseRepository.findAll();
-        }
-
-
-
+    }
 }
 

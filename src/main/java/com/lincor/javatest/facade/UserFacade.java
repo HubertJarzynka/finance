@@ -28,4 +28,5 @@ public class UserFacade {
     public UserDto getUserById(final Long id) throws UserNotFoundException {
         return userMapper.mapToUserDto(userService.getUserByID(id));
     }
+
 }
